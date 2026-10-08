@@ -2,6 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 from datetime import date
 import time
+from collections import defaultdict
 from database import init_db, get_members, get_round_counts, save_result, get_history, reset_round
 from gacha import draw_all
 
@@ -449,8 +450,7 @@ if st.session_state.show_gacha and st.session_state.results:
             st.rerun()
     with col_b:
         if st.button("✅ この結果で確定！", use_container_width=True):
-            for role, name in results.items():
-                save_result(role, name)
+            save_result(results)
             st.success("保存しました！お疲れさまでした🎉")
             st.session_state.show_gacha = False
             st.session_state.results = None
@@ -463,8 +463,12 @@ st.markdown("---")
 with st.expander("📋 直近7日の履歴"):
     history = get_history(7)
     if history:
-        for h in history:
-            st.write(f"**{h['date']}** 🚹{h.get('Men','-')} / 🚻{h.get('Guest','-')} / 🚺{h.get('Women','-')}")
+        grouped = defaultdict(dict)
+        for d, role, name in history:
+            grouped[d][role] = name
+        for d in sorted(grouped.keys(), reverse=True):
+            row = grouped[d]
+            st.write(f"**{d}** 🚹{row.get('Men','-')} / 🚻{row.get('Guest','-')} / 🚺{row.get('Women','-')}")
     else:
         st.write("履歴なし")
 
