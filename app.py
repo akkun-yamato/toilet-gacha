@@ -5,9 +5,12 @@ import time
 from database import init_db, get_members, get_round_counts, save_result, get_history, reset_round
 from gacha import draw_all
 
-st.set_page_config(page_title="ヤマト トイレ掃除ガチャ", page_icon="🎰", layout="wide")
+st.set_page_config(
+    page_title="ヤマト トイレ掃除ガチャ",
+    page_icon="🎰",
+    layout="wide"
+)
 
-# DB初期化
 init_db()
 
 # カスタムCSS
@@ -18,36 +21,42 @@ st.markdown("""
     }
     h1 {
         text-align: center;
-        background: linear-gradient(90deg, #ff6b9d, #feca57, #a855f7);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 900;
+        color: #ff6b9d;
+        font-size: 2.5em;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+    .date-display {
+        text-align: center;
+        font-size: 1.2em;
+        color: #666;
+        margin-bottom: 20px;
     }
     .stButton>button {
-        background: linear-gradient(90deg, #ff6b9d, #a855f7);
+        background: linear-gradient(45deg, #ff6b9d, #c86dd7);
         color: white;
+        font-size: 1.3em;
         font-weight: bold;
-        border-radius: 25px;
+        padding: 15px 40px;
+        border-radius: 30px;
         border: none;
-        padding: 12px 30px;
-        font-size: 18px;
-        width: 100%;
+        box-shadow: 0 4px 15px rgba(255,107,157,0.4);
     }
     .stButton>button:hover {
-        background: linear-gradient(90deg, #feca57, #ff6b9d);
-        transform: scale(1.02);
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(255,107,157,0.6);
     }
     .winner-card {
         background: white;
-        border-radius: 20px;
         padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         text-align: center;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
         margin: 10px 0;
-        min-height: 160px;
+        min-height: 140px;
     }
     .winner-card h2 {
-        font-size: 24px;
+        font-size: 1.8em;
+        margin: 10px 0;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -55,34 +64,27 @@ st.markdown("""
     .role-men { border-top: 6px solid #4a90e2; }
     .role-guest { border-top: 6px solid #feca57; }
     .role-women { border-top: 6px solid #ff6b9d; }
-        /* チェックボックスの文字を大きく */
     .stCheckbox label p {
         font-size: 20px !important;
         font-weight: bold !important;
     }
-    .stCheckbox label {
-        padding: 8px 0 !important;
-    }
-
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🎰 ヤマト トイレ掃除ガチャ 🎰")
-st.markdown(f"<p style='text-align:center; font-size:18px;'>📅 {date.today().strftime('%Y年%m月%d日')}</p>", unsafe_allow_html=True)
+# タイトル
+st.markdown("<h1>🎰 ヤマト トイレ掃除ガチャ 🎰</h1>", unsafe_allow_html=True)
+st.markdown(f"<div class='date-display'>📅 {date.today().strftime('%Y年%m月%d日')}</div>", unsafe_allow_html=True)
 
-# 進捗表示
+# 進捗メトリクス
+col1, col2, col3 = st.columns(3)
 men_done, men_total = get_round_counts("Men")
 guest_done, guest_total = get_round_counts("Guest")
 women_done, women_total = get_round_counts("Women")
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.metric("🚹 男性", f"{men_done}/{men_total}")
-with col2:
-    st.metric("🚻 ゲスト", f"{guest_done}/{guest_total}")
-with col3:
-    st.metric("🚺 女子", f"{women_done}/{women_total}")
+col1.metric("🚹 男性", f"{men_done}/{men_total}")
+col2.metric("🚻 ゲスト", f"{guest_done}/{guest_total}")
+col3.metric("🚺 女子", f"{women_done}/{women_total}")
 
-st.divider()
+st.markdown("---")
 
 # セッション初期化
 if "absent" not in st.session_state:
@@ -94,42 +96,40 @@ if "show_gacha" not in st.session_state:
 
 # 不在者チェック
 with st.expander("👥 本日の不在者チェック", expanded=False):
-    st.markdown("##### 🚹 男性")
+    st.markdown("**出張・休暇の人にチェック**")
+    absent = []
     men = get_members("M")
-    cols = st.columns(4)
-    absent_men = []
-    for i, name in enumerate(men):
-        with cols[i % 4]:
-            if st.checkbox(name, key=f"abs_m_{name}"):
-                absent_men.append(name)
-
-    st.markdown("##### 🚺 女子")
     women = get_members("F")
+
+    st.markdown("### 🚹 男性")
     cols = st.columns(4)
-    absent_women = []
+    for i, name in enumerate(men):
+        if cols[i % 4].checkbox(name, key=f"abs_m_{name}"):
+            absent.append(name)
+
+    st.markdown("### 🚺 女子")
+    cols = st.columns(4)
     for i, name in enumerate(women):
-        with cols[i % 4]:
-            if st.checkbox(name, key=f"abs_w_{name}"):
-                absent_women.append(name)
+        if cols[i % 4].checkbox(name, key=f"abs_w_{name}"):
+            absent.append(name)
 
-    st.session_state.absent = absent_men + absent_women
-    st.info(f"🍡 本日の不在者: {len(st.session_state.absent)}名")
-
-st.divider()
+    st.session_state.absent = absent
+    if absent:
+        st.info(f"本日の不在者: {len(absent)}名")
 
 # ガチャボタン
-if st.button("🎁 ガチャを回す！ 🎰", key="gacha_btn"):
+if st.button("🎁 ガチャを回す！ 🎰", use_container_width=True):
     results = draw_all(st.session_state.absent)
     st.session_state.results = results
     st.session_state.show_gacha = True
     st.rerun()
 
-# ガチャ演出＆結果表示
+# ガチャ演出
 if st.session_state.show_gacha and st.session_state.results:
     results = st.session_state.results
-    men_name = results.get("Men") or "なし"
-    guest_name = results.get("Guest") or "なし"
-    women_name = results.get("Women") or "なし"
+    men_name = results.get("Men", "該当者なし")
+    guest_name = results.get("Guest", "該当者なし")
+    women_name = results.get("Women", "該当者なし")
 
     gacha_html = f"""
     <!DOCTYPE html>
@@ -138,379 +138,335 @@ if st.session_state.show_gacha and st.session_state.results:
     <style>
         body {{
             margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            font-family: 'Arial Black', sans-serif;
+            padding: 10px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
             overflow: hidden;
         }}
-        .stage {{
+        .gacha-container {{
             display: flex;
-            justify-content: space-around;
-            align-items: flex-end;
-            min-height: 500px;
-            position: relative;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 10px;
+            flex-wrap: nowrap;
         }}
         .machine {{
-            position: relative;
-            width: 220px;
-            height: 340px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }}
-        .top-dome {{
             width: 180px;
-            height: 180px;
-            border-radius: 50% 50% 10% 10%;
-            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6), rgba(255,255,255,0.1));
-            border: 4px solid gold;
+            text-align: center;
+            position: relative;
+        }}
+        .dome {{
+            width: 160px;
+            height: 160px;
+            margin: 0 auto;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), rgba(255,255,255,0.1));
+            border-radius: 50% 50% 10px 10px;
             position: relative;
             overflow: hidden;
-            box-shadow: inset 0 0 30px rgba(255,255,255,0.3), 0 0 20px rgba(255,215,0,0.5);
+            border: 3px solid rgba(255,255,255,0.3);
+            box-shadow: 0 0 30px rgba(100,200,255,0.3), inset 0 0 20px rgba(255,255,255,0.2);
         }}
-        .machine.men .top-dome {{ border-color: #4a90e2; box-shadow: inset 0 0 30px rgba(74,144,226,0.3), 0 0 25px rgba(74,144,226,0.8); }}
-        .machine.guest .top-dome {{ border-color: #feca57; box-shadow: inset 0 0 30px rgba(254,202,87,0.3), 0 0 25px rgba(254,202,87,0.8); }}
-        .machine.women .top-dome {{ border-color: #ff6b9d; box-shadow: inset 0 0 30px rgba(255,107,157,0.3), 0 0 25px rgba(255,107,157,0.8); }}
-
-        .capsules {{
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-        }}
+        .machine.men .dome {{ box-shadow: 0 0 30px #4a90e2, inset 0 0 20px rgba(255,255,255,0.2); border-color: #4a90e2; }}
+        .machine.guest .dome {{ box-shadow: 0 0 30px #feca57, inset 0 0 20px rgba(255,255,255,0.2); border-color: #feca57; }}
+        .machine.women .dome {{ box-shadow: 0 0 30px #ff6b9d, inset 0 0 20px rgba(255,255,255,0.2); border-color: #ff6b9d; }}
         .mini-cap {{
-            position: absolute;
-            width: 28px;
-            height: 28px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            animation: bounce 1.5s infinite ease-in-out;
+            position: absolute;
+            animation: shake 0.5s infinite;
         }}
-        .mini-cap:nth-child(1) {{ top: 18%; left: 12%; background: #ff6b9d; animation-delay: 0s; }}
-        .mini-cap:nth-child(2) {{ top: 38%; left: 55%; background: #feca57; animation-delay: 0.2s; }}
-        .mini-cap:nth-child(3) {{ top: 58%; left: 20%; background: #4a90e2; animation-delay: 0.4s; }}
-        .mini-cap:nth-child(4) {{ top: 28%; left: 65%; background: #a855f7; animation-delay: 0.6s; }}
-        .mini-cap:nth-child(5) {{ top: 55%; left: 48%; background: #4ecdc4; animation-delay: 0.8s; }}
-
-        @keyframes bounce {{
-            0%, 100% {{ transform: translateY(0); }}
-            50% {{ transform: translateY(-10px); }}
+        .mini-cap:nth-child(1) {{ background: #ff6b9d; top: 15px; left: 20px; animation-delay: 0s; }}
+        .mini-cap:nth-child(2) {{ background: #c86dd7; top: 30px; right: 15px; animation-delay: 0.1s; }}
+        .mini-cap:nth-child(3) {{ background: #feca57; bottom: 20px; left: 50px; animation-delay: 0.2s; }}
+        .mini-cap:nth-child(4) {{ background: #48dbfb; bottom: 30px; right: 30px; animation-delay: 0.15s; }}
+        .mini-cap:nth-child(5) {{ background: #1dd1a1; top: 60px; left: 60px; animation-delay: 0.25s; }}
+        @keyframes shake {{
+            0%, 100% {{ transform: translate(0,0); }}
+            25% {{ transform: translate(5px,-5px); }}
+            50% {{ transform: translate(-3px,3px); }}
+            75% {{ transform: translate(3px,-3px); }}
         }}
-
         .body {{
-            width: 190px;
-            height: 110px;
-            background: linear-gradient(180deg, #e74c3c, #c0392b);
-            margin-top: -5px;
-            border-radius: 5px;
+            width: 160px;
+            height: 100px;
+            margin: 0 auto;
+            border-radius: 10px;
             position: relative;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            margin-top: -5px;
         }}
-        .machine.men .body {{ background: linear-gradient(180deg, #3498db, #2980b9); }}
-        .machine.guest .body {{ background: linear-gradient(180deg, #f39c12, #e67e22); }}
-        .machine.women .body {{ background: linear-gradient(180deg, #e91e63, #c2185b); }}
-
-        .handle {{
+        .machine.men .body {{ background: linear-gradient(145deg, #4a90e2, #2e5c99); }}
+        .machine.guest .body {{ background: linear-gradient(145deg, #feca57, #c99830); }}
+        .machine.women .body {{ background: linear-gradient(145deg, #ff6b9d, #c84177); }}
+        .slot {{
+            width: 60px;
+            height: 20px;
+            background: #222;
+            border-radius: 5px;
             position: absolute;
-            width: 50px;
-            height: 50px;
-            background: radial-gradient(circle, #ffd700, #b8860b);
-            border-radius: 50%;
-            top: 30px;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            border: 3px solid #333;
-            animation: spin 0.3s linear infinite;
+        }}
+        .handle {{
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle at 30% 30%, #fff568, #d4a800);
+            border-radius: 50%;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            animation: rotate 1s linear infinite;
             animation-play-state: paused;
         }}
-        .handle::before {{
+        .handle::after {{
             content: '';
-            position: absolute;
-            width: 8px;
-            height: 25px;
+            width: 4px;
+            height: 20px;
             background: #333;
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }}
+        .machine.rotating .handle {{ animation-play-state: running; }}
+        .machine.shaking {{ animation: machine-shake 0.2s infinite; }}
+        @keyframes rotate {{
+            from {{ transform: translateX(-50%) rotate(0deg); }}
+            to {{ transform: translateX(-50%) rotate(360deg); }}
+        }}
+        @keyframes machine-shake {{
+            0%, 100% {{ transform: translate(0,0); }}
+            25% {{ transform: translate(-3px, 2px); }}
+            75% {{ transform: translate(3px, -2px); }}
+        }}
+        .capsule {{
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            border-radius: 4px;
-        }}
-        .spinning .handle {{ animation-play-state: running; }}
-
-        @keyframes spin {{
-            0% {{ transform: translateX(-50%) rotate(0deg); }}
-            100% {{ transform: translateX(-50%) rotate(360deg); }}
-        }}
-
-        .slot {{
-            width: 70px;
-            height: 22px;
-            background: #000;
-            margin: 10px auto;
-            border-radius: 3px;
-        }}
-
-        .capsule {{
-            position: absolute;
-            width: 85px;
-            height: 85px;
-            border-radius: 50%;
-            left: 50%;
-            top: 240px;
-            transform: translateX(-50%) scale(0);
+            transform: translate(-50%, -50%) scale(0);
             opacity: 0;
             z-index: 10;
-            background: linear-gradient(180deg, #fff 0%, #fff 48%, #ff6b9d 52%, #ff6b9d 100%);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3), inset 0 -5px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 0 30px gold;
         }}
-        .machine.men .capsule {{ background: linear-gradient(180deg, #fff 0%, #fff 48%, #4a90e2 52%, #4a90e2 100%); }}
-        .machine.guest .capsule {{ background: linear-gradient(180deg, #fff 0%, #fff 48%, #feca57 52%, #feca57 100%); }}
-
-        .dropping .capsule {{
-            animation: drop 1s ease-out forwards;
+        .machine.men .capsule {{ background: linear-gradient(145deg, #6ba3e8, #2e5c99); }}
+        .machine.guest .capsule {{ background: linear-gradient(145deg, #ffd770, #c99830); }}
+        .machine.women .capsule {{ background: linear-gradient(145deg, #ff87b0, #c84177); }}
+        .machine.drop .capsule {{
+            animation: drop 1s ease-in forwards;
         }}
         @keyframes drop {{
-            0% {{ transform: translateX(-50%) translateY(-100px) scale(0.5); opacity: 0; }}
-            60% {{ transform: translateX(-50%) translateY(20px) scale(1); opacity: 1; }}
-            80% {{ transform: translateX(-50%) translateY(0) scale(1.1); opacity: 1; }}
-            100% {{ transform: translateX(-50%) translateY(10px) scale(1); opacity: 1; }}
+            0% {{ transform: translate(-50%, -200px) scale(1); opacity: 1; }}
+            80% {{ transform: translate(-50%, 100px) scale(1); opacity: 1; }}
+            100% {{ transform: translate(-50%, 100px) scale(1.2); opacity: 1; }}
         }}
-
-        .opened .capsule {{
-            animation: open 0.5s ease-out forwards;
-        }}
-        @keyframes open {{
-            0% {{ transform: translateX(-50%) scale(1); }}
-            50% {{ transform: translateX(-50%) scale(1.6); }}
-            100% {{ transform: translateX(-50%) scale(0); opacity: 0; }}
-        }}
-
         .winner {{
-            position: absolute;
-            left: 50%;
-            top: 180px;
-            transform: translateX(-50%) scale(0);
-            background: linear-gradient(135deg, #ffd700, #ff6b9d);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 15px;
-            font-size: 22px;
-            font-weight: 900;
+            margin-top: 15px;
+            background: white;
+            border-radius: 10px;
+            padding: 12px 8px;
+            font-weight: bold;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.5s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }}
+        .machine.show-winner .winner {{
+            opacity: 1;
+            transform: scale(1);
+        }}
+        .role-label {{
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }}
+        .winner-name {{
+            font-size: 1.4em;
             white-space: nowrap;
-            box-shadow: 0 0 30px rgba(255,215,0,0.8);
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            z-index: 20;
-            opacity: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }}
-        .machine.men .winner {{ background: linear-gradient(135deg, #4a90e2, #2980b9); }}
-        .machine.guest .winner {{ background: linear-gradient(135deg, #feca57, #e67e22); }}
-        .machine.women .winner {{ background: linear-gradient(135deg, #ff6b9d, #c2185b); }}
+        .machine.men .winner-name {{ color: #4a90e2; }}
+        .machine.guest .winner-name {{ color: #c99830; }}
+        .machine.women .winner-name {{ color: #ff6b9d; }}
 
-        .reveal .winner {{
-            animation: reveal 0.6s ease-out forwards;
-        }}
-        @keyframes reveal {{
-            0% {{ transform: translateX(-50%) scale(0) rotate(-180deg); opacity: 0; }}
-            60% {{ transform: translateX(-50%) scale(1.3) rotate(10deg); opacity: 1; }}
-            100% {{ transform: translateX(-50%) scale(1) rotate(0deg); opacity: 1; }}
-        }}
-
-        .label {{
-            color: white;
-            font-size: 14px;
-            margin-top: 10px;
-            text-align: center;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }}
-
-        .confetti {{
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            opacity: 0;
-            top: 200px;
-            left: 50%;
-        }}
-        .reveal .confetti {{
-            animation: confetti-fall 1.5s ease-out forwards;
-        }}
-        @keyframes confetti-fall {{
-            0% {{ transform: translate(0, 0) rotate(0deg); opacity: 1; }}
-            100% {{ transform: translate(var(--x), var(--y)) rotate(720deg); opacity: 0; }}
-        }}
-
-        .sparkle {{
-            position: absolute;
-            width: 25px;
-            height: 25px;
-            background: radial-gradient(circle, #fff, transparent);
-            border-radius: 50%;
-            opacity: 0;
-        }}
-        .reveal .sparkle {{
-            animation: sparkle 1s ease-out forwards;
-        }}
-        @keyframes sparkle {{
-            0% {{ transform: scale(0); opacity: 1; }}
-            100% {{ transform: scale(3); opacity: 0; }}
-        }}
-
-        .shake {{
-            animation: shake 0.1s infinite;
-        }}
-        @keyframes shake {{
-            0%, 100% {{ transform: translateX(0); }}
-            25% {{ transform: translateX(-3px); }}
-            75% {{ transform: translateX(3px); }}
+        /* ========== スマホ対応 ========== */
+        @media (max-width: 600px) {{
+            body {{ padding: 5px; }}
+            .gacha-container {{
+                gap: 5px;
+                padding: 5px;
+            }}
+            .machine {{ width: 110px; }}
+            .dome {{
+                width: 95px;
+                height: 95px;
+            }}
+            .mini-cap {{ width: 20px; height: 20px; }}
+            .mini-cap:nth-child(1) {{ top: 10px; left: 10px; }}
+            .mini-cap:nth-child(2) {{ top: 20px; right: 8px; }}
+            .mini-cap:nth-child(3) {{ bottom: 12px; left: 30px; }}
+            .mini-cap:nth-child(4) {{ bottom: 18px; right: 18px; }}
+            .mini-cap:nth-child(5) {{ top: 40px; left: 40px; }}
+            .body {{
+                width: 95px;
+                height: 65px;
+            }}
+            .slot {{
+                width: 40px;
+                height: 14px;
+                top: 12px;
+            }}
+            .handle {{
+                width: 26px;
+                height: 26px;
+                bottom: 12px;
+            }}
+            .handle::after {{
+                width: 3px;
+                height: 13px;
+                top: 6px;
+            }}
+            .capsule {{
+                width: 42px;
+                height: 42px;
+            }}
+            @keyframes drop {{
+                0% {{ transform: translate(-50%, -140px) scale(1); opacity: 1; }}
+                80% {{ transform: translate(-50%, 70px) scale(1); opacity: 1; }}
+                100% {{ transform: translate(-50%, 70px) scale(1.2); opacity: 1; }}
+            }}
+            .winner {{
+                margin-top: 10px;
+                padding: 8px 4px;
+            }}
+            .role-label {{ font-size: 0.7em; }}
+            .winner-name {{ font-size: 1em; }}
         }}
     </style>
     </head>
     <body>
-        <div class="stage">
-            <div class="machine men" id="m1">
-                <div class="top-dome">
-                    <div class="capsules">
-                        <div class="mini-cap"></div><div class="mini-cap"></div>
-                        <div class="mini-cap"></div><div class="mini-cap"></div>
-                        <div class="mini-cap"></div>
-                    </div>
+        <div class="gacha-container">
+            <div class="machine men" id="m-men">
+                <div class="dome">
+                    <div class="mini-cap"></div>
+                    <div class="mini-cap"></div>
+                    <div class="mini-cap"></div>
+                    <div class="mini-cap"></div>
+                    <div class="mini-cap"></div>
                 </div>
                 <div class="body">
-                    <div class="handle"></div>
                     <div class="slot"></div>
+                    <div class="handle"></div>
+                    <div class="capsule"></div>
                 </div>
-                <div class="capsule"></div>
-                <div class="winner">🚹 {men_name}</div>
-                <div class="label">男性トイレ</div>
-                <div class="confetti" style="--x:-80px; --y:150px; background:#ff6b9d;"></div>
-                <div class="confetti" style="--x:80px; --y:150px; background:#feca57;"></div>
-                <div class="confetti" style="--x:-50px; --y:180px; background:#4ecdc4;"></div>
-                <div class="confetti" style="--x:50px; --y:180px; background:#a855f7;"></div>
-                <div class="sparkle" style="top:150px; left:30%;"></div>
-                <div class="sparkle" style="top:150px; left:70%;"></div>
+                <div class="winner">
+                    <div class="role-label">🚹 男性トイレ</div>
+                    <div class="winner-name">{men_name}</div>
+                </div>
             </div>
-
-            <div class="machine guest" id="m2">
-                <div class="top-dome">
-                    <div class="capsules">
-                        <div class="mini-cap"></div><div class="mini-cap"></div>
-                        <div class="mini-cap"></div><div class="mini-cap"></div>
-                        <div class="mini-cap"></div>
-                    </div>
+            <div class="machine guest" id="m-guest">
+                <div class="dome">
+                    <div class="mini-cap"></div>
+                    <div class="mini-cap"></div>
+                    <div class="mini-cap"></div>
+                    <div class="mini-cap"></div>
+                    <div class="mini-cap"></div>
                 </div>
                 <div class="body">
-                    <div class="handle"></div>
                     <div class="slot"></div>
+                    <div class="handle"></div>
+                    <div class="capsule"></div>
                 </div>
-                <div class="capsule"></div>
-                <div class="winner">🚻 {guest_name}</div>
-                <div class="label">ゲストトイレ</div>
-                <div class="confetti" style="--x:-80px; --y:150px; background:#ff6b9d;"></div>
-                <div class="confetti" style="--x:80px; --y:150px; background:#feca57;"></div>
-                <div class="confetti" style="--x:-50px; --y:180px; background:#4ecdc4;"></div>
-                <div class="confetti" style="--x:50px; --y:180px; background:#a855f7;"></div>
-                <div class="sparkle" style="top:150px; left:30%;"></div>
-                <div class="sparkle" style="top:150px; left:70%;"></div>
+                <div class="winner">
+                    <div class="role-label">🚻 ゲストトイレ</div>
+                    <div class="winner-name">{guest_name}</div>
+                </div>
             </div>
-
-            <div class="machine women" id="m3">
-                <div class="top-dome">
-                    <div class="capsules">
-                        <div class="mini-cap"></div><div class="mini-cap"></div>
-                        <div class="mini-cap"></div><div class="mini-cap"></div>
-                        <div class="mini-cap"></div>
-                    </div>
+            <div class="machine women" id="m-women">
+                <div class="dome">
+                    <div class="mini-cap"></div>
+                    <div class="mini-cap"></div>
+                    <div class="mini-cap"></div>
+                    <div class="mini-cap"></div>
+                    <div class="mini-cap"></div>
                 </div>
                 <div class="body">
-                    <div class="handle"></div>
                     <div class="slot"></div>
+                    <div class="handle"></div>
+                    <div class="capsule"></div>
                 </div>
-                <div class="capsule"></div>
-                <div class="winner">🚺 {women_name}</div>
-                <div class="label">女子トイレ</div>
-                <div class="confetti" style="--x:-80px; --y:150px; background:#ff6b9d;"></div>
-                <div class="confetti" style="--x:80px; --y:150px; background:#feca57;"></div>
-                <div class="confetti" style="--x:-50px; --y:180px; background:#4ecdc4;"></div>
-                <div class="confetti" style="--x:50px; --y:180px; background:#a855f7;"></div>
-                <div class="sparkle" style="top:150px; left:30%;"></div>
-                <div class="sparkle" style="top:150px; left:70%;"></div>
+                <div class="winner">
+                    <div class="role-label">🚺 女子トイレ</div>
+                    <div class="winner-name">{women_name}</div>
+                </div>
             </div>
         </div>
-
         <script>
-            const machines = ['m1', 'm2', 'm3'];
+            const machines = ['m-men', 'm-guest', 'm-women'];
             setTimeout(() => {{
-                machines.forEach(id => document.getElementById(id).classList.add('spinning'));
+                machines.forEach(id => document.getElementById(id).classList.add('rotating', 'shaking'));
             }}, 300);
-
             setTimeout(() => {{
-                machines.forEach(id => document.getElementById(id).classList.add('shake'));
+                machines.forEach(id => {{
+                    const m = document.getElementById(id);
+                    m.classList.remove('rotating', 'shaking');
+                    m.classList.add('drop');
+                }});
             }}, 3000);
-
             setTimeout(() => {{
-                machines.forEach(id => {{
-                    const m = document.getElementById(id);
-                    m.classList.remove('spinning', 'shake');
-                    m.classList.add('dropping');
-                }});
-            }}, 3800);
-
-            setTimeout(() => {{
-                machines.forEach(id => {{
-                    const m = document.getElementById(id);
-                    m.classList.remove('dropping');
-                    m.classList.add('opened', 'reveal');
-                }});
-            }}, 5000);
+                machines.forEach(id => document.getElementById(id).classList.add('show-winner'));
+            }}, 4200);
         </script>
     </body>
     </html>
     """
-    components.html(gacha_html, height=550)
+    components.html(gacha_html, height=500)
 
-    st.markdown("### 🏆 本日の勇者たち")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown(f"<div class='winner-card role-men'><h4>🚹 男性</h4><h2>{men_name}</h2></div>", unsafe_allow_html=True)
-    with col2:
-        st.markdown(f"<div class='winner-card role-guest'><h4>🚻 ゲスト</h4><h2>{guest_name}</h2></div>", unsafe_allow_html=True)
-    with col3:
-        st.markdown(f"<div class='winner-card role-women'><h4>🚺 女子</h4><h2>{women_name}</h2></div>", unsafe_allow_html=True)
+    # 結果カード
+    st.markdown("### 🎉 本日の掃除担当")
+    c1, c2, c3 = st.columns(3)
+    c1.markdown(f"<div class='winner-card role-men'><div>🚹 男性トイレ</div><h2>{men_name}</h2></div>", unsafe_allow_html=True)
+    c2.markdown(f"<div class='winner-card role-guest'><div>🚻 ゲストトイレ</div><h2>{guest_name}</h2></div>", unsafe_allow_html=True)
+    c3.markdown(f"<div class='winner-card role-women'><div>🚺 女子トイレ</div><h2>{women_name}</h2></div>", unsafe_allow_html=True)
 
     col_a, col_b = st.columns(2)
     with col_a:
-        if st.button("🔄 引き直す"):
+        if st.button("🔄 引き直す", use_container_width=True):
             results = draw_all(st.session_state.absent)
             st.session_state.results = results
             st.rerun()
     with col_b:
-        if st.button("✅ この結果で確定！"):
-            save_result(st.session_state.results)
-            st.success("🎉 記録しました！今日もキレイにお願いします〜✨")
-            st.session_state.results = None
+        if st.button("✅ この結果で確定！", use_container_width=True):
+            for role, name in results.items():
+                save_result(role, name)
+            st.success("保存しました！お疲れさまでした🎉")
             st.session_state.show_gacha = False
+            st.session_state.results = None
             time.sleep(2)
             st.rerun()
 
-st.divider()
+st.markdown("---")
 
-# 履歴表示
+# 履歴
 with st.expander("📋 直近7日の履歴"):
     history = get_history(7)
     if history:
-        current_date = None
-        for d, role, name in history:
-            if d != current_date:
-                st.markdown(f"**📅 {d}**")
-                current_date = d
-            emoji = {"Men": "🚹", "Guest": "🚻", "Women": "🚺"}
-            st.markdown(f"　{emoji[role]} {role}: {name}")
+        for h in history:
+            st.write(f"**{h['date']}** 🚹{h.get('Men','-')} / 🚻{h.get('Guest','-')} / 🚺{h.get('Women','-')}")
     else:
-        st.info("まだ履歴がありません")
+        st.write("履歴なし")
 
 # 管理メニュー
 with st.expander("⚙️ 管理メニュー"):
-    st.warning("⚠️ リセット操作は慎重に！")
-    if st.button("🔄 全周リセット（当選済みを全部クリア）"):
+    if st.button("🔄 全周リセット"):
         reset_round()
-        st.success("リセットしました")
+        st.success("リセット完了！")
         st.rerun()
