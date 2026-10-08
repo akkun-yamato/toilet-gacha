@@ -264,12 +264,12 @@ if st.session_state.show_gacha and st.session_state.results:
         }}
         @keyframes drop {{
             0% {{ transform: translate(-50%, -200px) scale(1); opacity: 1; }}
-            70% {{ transform: translate(-50%, 85px) scale(1); opacity: 1; }}
-            85% {{ transform: translate(-50%, 70px) scale(1); opacity: 1; }}
-            100% {{ transform: translate(-50%, 85px) scale(1.05); opacity: 1; }}
+            70% {{ transform: translate(-50%, 65px) scale(1); opacity: 1; }}
+            85% {{ transform: translate(-50%, 50px) scale(1); opacity: 1; }}
+            100% {{ transform: translate(-50%, 65px) scale(1.05); opacity: 1; }}
         }}
         .winner {{
-            margin-top: 70px;
+            margin-top: 95px;
             background: white;
             border-radius: 10px;
             padding: 10px 8px;
@@ -343,12 +343,12 @@ if st.session_state.show_gacha and st.session_state.results:
             }}
             @keyframes drop {{
                 0% {{ transform: translate(-50%, -120px) scale(1); opacity: 1; }}
-                70% {{ transform: translate(-50%, 55px) scale(1); opacity: 1; }}
-                85% {{ transform: translate(-50%, 45px) scale(1); opacity: 1; }}
-                100% {{ transform: translate(-50%, 55px) scale(1.05); opacity: 1; }}
+                70% {{ transform: translate(-50%, 40px) scale(1); opacity: 1; }}
+                85% {{ transform: translate(-50%, 32px) scale(1); opacity: 1; }}
+                100% {{ transform: translate(-50%, 40px) scale(1.05); opacity: 1; }}
             }}
             .winner {{
-                margin-top: 50px;
+                margin-top: 65px;
                 padding: 6px 4px;
             }}
             .role-label {{ font-size: 0.7em; }}
@@ -432,7 +432,7 @@ if st.session_state.show_gacha and st.session_state.results:
     </body>
     </html>
     """
-    components.html(gacha_html, height=430)
+    components.html(gacha_html, height=450)
 
     # 結果カード
     st.markdown("### 🎉 本日の掃除担当")
