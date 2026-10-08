@@ -236,8 +236,8 @@ if st.session_state.show_gacha and st.session_state.results:
             75% {{ transform: translate(3px, -2px); }}
         }}
         .capsule {{
-            width: 60px;
-            height: 60px;
+            width: 55px;
+            height: 55px;
             border-radius: 50%;
             position: absolute;
             top: 50%;
@@ -245,29 +245,41 @@ if st.session_state.show_gacha and st.session_state.results:
             transform: translate(-50%, -50%) scale(0);
             opacity: 0;
             z-index: 10;
-            box-shadow: 0 0 30px gold;
+            box-shadow: 0 0 30px gold, inset -5px -8px 15px rgba(0,0,0,0.3), inset 8px 8px 15px rgba(255,255,255,0.4);
         }}
-        .machine.men .capsule {{ background: linear-gradient(145deg, #6ba3e8, #2e5c99); }}
-        .machine.guest .capsule {{ background: linear-gradient(145deg, #ffd770, #c99830); }}
-        .machine.women .capsule {{ background: linear-gradient(145deg, #ff87b0, #c84177); }}
+        .machine.men .capsule {{
+            background: linear-gradient(to bottom, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.3) 48%, #4a90e2 52%, #2e5c99 100%);
+            border: 2px solid rgba(255,255,255,0.6);
+        }}
+        .machine.guest .capsule {{
+            background: linear-gradient(to bottom, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.3) 48%, #feca57 52%, #c99830 100%);
+            border: 2px solid rgba(255,255,255,0.6);
+        }}
+        .machine.women .capsule {{
+            background: linear-gradient(to bottom, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.3) 48%, #ff6b9d 52%, #c84177 100%);
+            border: 2px solid rgba(255,255,255,0.6);
+        }}
         .machine.drop .capsule {{
             animation: drop 1s ease-in forwards;
         }}
         @keyframes drop {{
-            0% {{ transform: translate(-50%, -180px) scale(1); opacity: 1; }}
-            80% {{ transform: translate(-50%, 10px) scale(1); opacity: 1; }}
-            100% {{ transform: translate(-50%, 10px) scale(1.1); opacity: 1; }}
+            0% {{ transform: translate(-50%, -200px) scale(1); opacity: 1; }}
+            70% {{ transform: translate(-50%, 85px) scale(1); opacity: 1; }}
+            85% {{ transform: translate(-50%, 70px) scale(1); opacity: 1; }}
+            100% {{ transform: translate(-50%, 85px) scale(1.05); opacity: 1; }}
         }}
         .winner {{
-            margin-top: 15px;
+            margin-top: 70px;
             background: white;
             border-radius: 10px;
-            padding: 12px 8px;
+            padding: 10px 8px;
             font-weight: bold;
             opacity: 0;
             transform: scale(0.5);
             transition: all 0.5s ease;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 5;
         }}
         .machine.show-winner .winner {{
             opacity: 1;
@@ -326,16 +338,17 @@ if st.session_state.show_gacha and st.session_state.results:
                 top: 6px;
             }}
             .capsule {{
-                width: 42px;
-                height: 42px;
+                width: 38px;
+                height: 38px;
             }}
             @keyframes drop {{
-                0% {{ transform: translate(-50%, -90px) scale(1); opacity: 1; }}
-                80% {{ transform: translate(-50%, 5px) scale(1); opacity: 1; }}
-                100% {{ transform: translate(-50%, 5px) scale(1.05); opacity: 1; }}
+                0% {{ transform: translate(-50%, -120px) scale(1); opacity: 1; }}
+                70% {{ transform: translate(-50%, 55px) scale(1); opacity: 1; }}
+                85% {{ transform: translate(-50%, 45px) scale(1); opacity: 1; }}
+                100% {{ transform: translate(-50%, 55px) scale(1.05); opacity: 1; }}
             }}
             .winner {{
-                margin-top: 5px;
+                margin-top: 50px;
                 padding: 6px 4px;
             }}
             .role-label {{ font-size: 0.7em; }}
@@ -419,7 +432,7 @@ if st.session_state.show_gacha and st.session_state.results:
     </body>
     </html>
     """
-    components.html(gacha_html, height=380)
+    components.html(gacha_html, height=430)
 
     # 結果カード
     st.markdown("### 🎉 本日の掃除担当")
