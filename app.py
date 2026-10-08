@@ -299,10 +299,10 @@ if st.session_state.show_gacha and st.session_state.results:
 
         /* ========== スマホ対応 ========== */
         @media (max-width: 600px) {{
-            body {{ padding: 5px; }}
+            body {{ padding: 2px; }}
             .gacha-container {{
                 gap: 5px;
-                padding: 5px;
+                padding: 2px;
             }}
             .machine {{ width: 110px; }}
             .dome {{
@@ -339,13 +339,13 @@ if st.session_state.show_gacha and st.session_state.results:
                 height: 42px;
             }}
             @keyframes drop {{
-                0% {{ transform: translate(-50%, -140px) scale(1); opacity: 1; }}
-                80% {{ transform: translate(-50%, 70px) scale(1); opacity: 1; }}
-                100% {{ transform: translate(-50%, 70px) scale(1.2); opacity: 1; }}
+                0% {{ transform: translate(-50%, -100px) scale(1); opacity: 1; }}
+                80% {{ transform: translate(-50%, 20px) scale(1); opacity: 1; }}
+                100% {{ transform: translate(-50%, 20px) scale(1.1); opacity: 1; }}
             }}
             .winner {{
-                margin-top: 10px;
-                padding: 8px 4px;
+                margin-top: 5px;
+                padding: 6px 4px;
             }}
             .role-label {{ font-size: 0.7em; }}
             .winner-name {{ font-size: 1em; }}
@@ -428,7 +428,8 @@ if st.session_state.show_gacha and st.session_state.results:
     </body>
     </html>
     """
-    components.html(gacha_html, height=500)
+    # PC表示なら500px、スマホ想定なら余白減らしたいので380pxに縮小
+    components.html(gacha_html, height=380)
 
     # 結果カード
     st.markdown("### 🎉 本日の掃除担当")
