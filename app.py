@@ -3,7 +3,7 @@ import streamlit.components.v1 as components
 from datetime import date
 import time
 from collections import defaultdict
-from database import init_db, get_members, get_round_counts, save_result, get_history, reset_round
+from database import init_db, get_members, get_round_counts, save_result, get_history, reset_round, clear_history
 from gacha import draw_all
 
 st.set_page_config(
@@ -13,7 +13,6 @@ st.set_page_config(
 )
 
 init_db()
-
 
 # カスタムCSS
 st.markdown("""
@@ -475,7 +474,33 @@ with st.expander("📋 直近7日の履歴"):
 
 # 管理メニュー
 with st.expander("⚙️ 管理メニュー"):
-    if st.button("🔄 全周リセット"):
+    # 現在の進捗表示
+    st.markdown("**📊 現在の進捗**")
+    men_done, men_total = get_round_counts("Men")
+    guest_done, guest_total = get_round_counts("Guest")
+    women_done, women_total = get_round_counts("Women")
+    st.write(f"🚹 男性トイレ：{men_done} / {men_total} 人完了")
+    st.write(f"🚻 ゲストトイレ：{guest_done} / {guest_total} 人完了")
+    st.write(f"🚺 女子トイレ：{women_done} / {women_total} 人完了")
+    
+    st.markdown("---")
+    
+    # 全周リセット
+    st.markdown("**🔄 全周リセット**（全員の当選状況をリセット）")
+    confirm_reset = st.checkbox("全周リセット内容を確認した", key="confirm_reset")
+    if st.button("🔄 全周リセット実行", disabled=not confirm_reset):
         reset_round()
-        st.success("リセット完了！")
+        st.success("✅ 全周リセット完了！全員が候補に戻りました🎉")
+        time.sleep(2)
+        st.rerun()
+    
+    st.markdown("---")
+    
+    # 履歴クリア
+    st.markdown("**🗑️ 履歴クリア**（直近7日の履歴を全削除）")
+    confirm_history = st.checkbox("履歴クリア内容を確認した", key="confirm_history")
+    if st.button("🗑️ 履歴を全削除", disabled=not confirm_history):
+        clear_history()
+        st.success("✅ 履歴クリア完了！")
+        time.sleep(2)
         st.rerun()
