@@ -75,15 +75,6 @@ st.markdown("""
 st.markdown("<h1>🎰 ヤマト トイレ掃除ガチャ 🎰</h1>", unsafe_allow_html=True)
 st.markdown(f"<div class='date-display'>📅 {date.today().strftime('%Y年%m月%d日')}</div>", unsafe_allow_html=True)
 
-# 進捗メトリクス
-col1, col2, col3 = st.columns(3)
-men_done, men_total = get_round_counts("Men")
-guest_done, guest_total = get_round_counts("Guest")
-women_done, women_total = get_round_counts("Women")
-col1.metric("🚹 男性", f"{men_done}/{men_total}")
-col2.metric("🚻 ゲスト", f"{guest_done}/{guest_total}")
-col3.metric("🚺 女子", f"{women_done}/{women_total}")
-
 st.markdown("---")
 
 # セッション初期化
@@ -263,9 +254,9 @@ if st.session_state.show_gacha and st.session_state.results:
             animation: drop 1s ease-in forwards;
         }}
         @keyframes drop {{
-            0% {{ transform: translate(-50%, -200px) scale(1); opacity: 1; }}
-            80% {{ transform: translate(-50%, 100px) scale(1); opacity: 1; }}
-            100% {{ transform: translate(-50%, 100px) scale(1.2); opacity: 1; }}
+            0% {{ transform: translate(-50%, -180px) scale(1); opacity: 1; }}
+            80% {{ transform: translate(-50%, 10px) scale(1); opacity: 1; }}
+            100% {{ transform: translate(-50%, 10px) scale(1.1); opacity: 1; }}
         }}
         .winner {{
             margin-top: 15px;
@@ -339,9 +330,9 @@ if st.session_state.show_gacha and st.session_state.results:
                 height: 42px;
             }}
             @keyframes drop {{
-                0% {{ transform: translate(-50%, -100px) scale(1); opacity: 1; }}
-                80% {{ transform: translate(-50%, 20px) scale(1); opacity: 1; }}
-                100% {{ transform: translate(-50%, 20px) scale(1.1); opacity: 1; }}
+                0% {{ transform: translate(-50%, -90px) scale(1); opacity: 1; }}
+                80% {{ transform: translate(-50%, 5px) scale(1); opacity: 1; }}
+                100% {{ transform: translate(-50%, 5px) scale(1.05); opacity: 1; }}
             }}
             .winner {{
                 margin-top: 5px;
@@ -428,7 +419,6 @@ if st.session_state.show_gacha and st.session_state.results:
     </body>
     </html>
     """
-    # PC表示なら500px、スマホ想定なら余白減らしたいので380pxに縮小
     components.html(gacha_html, height=380)
 
     # 結果カード
