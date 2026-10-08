@@ -145,3 +145,11 @@ def rename_member(old_name, new_name):
     c.execute("UPDATE round_status SET member_name=? WHERE member_name=?", (new_name, old_name))
     conn.commit()
     conn.close()
+
+def clear_history():
+    """全履歴を削除"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("DELETE FROM history")
+    conn.commit()
+    conn.close()
