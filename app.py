@@ -13,12 +13,7 @@ st.set_page_config(
 )
 
 init_db()
-# ★一時的な名前変更（1回実行したら削除）
-from database import rename_member
-try:
-    rename_member("りゅうちゃん", "しゃっちょ")
-except Exception as e:
-    pass
+
 
 # カスタムCSS
 st.markdown("""
