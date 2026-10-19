@@ -6,7 +6,7 @@ import json
 DB_PATH = Path("data/toilet.db")
 
 def init_db():
-    """DB初期化＆メンバー投入"""
+    """DB初期化＆メンバー投入（members.jsonと差分があれば総入れ替え）"""
     DB_PATH.parent.mkdir(exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -31,10 +31,23 @@ def init_db():
         PRIMARY KEY (role, member_name)
     )""")
     
-    c.execute("SELECT COUNT(*) FROM members")
-    if c.fetchone()[0] == 0:
-        with open("members.json", "r", encoding="utf-8") as f:
-            data = json.load(f)
+    # members.jsonを読み込み
+    with open("members.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+    json_men = set(data["men"])
+    json_women = set(data["women"])
+    
+    # 現在のDBの中身
+    c.execute("SELECT name FROM members WHERE gender='M'")
+    db_men = set(r[0] for r in c.fetchall())
+    c.execute("SELECT name FROM members WHERE gender='F'")
+    db_women = set(r[0] for r in c.fetchall())
+    
+    # 差分があれば総入れ替え（履歴は保持、round_statusはリセット）
+    if json_men != db_men or json_women != db_women:
+        c.execute("DELETE FROM members")
+        c.execute("DELETE FROM round_status")
+        
         for name in data["men"]:
             c.execute("INSERT INTO members (name, gender) VALUES (?, ?)", (name, "M"))
         for name in data["women"]:
