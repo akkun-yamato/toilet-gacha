@@ -1,8 +1,30 @@
 {
-  "history": [],
+  "history": [
+    {
+      "date": "2026-10-29",
+      "role": "Men",
+      "member_name": "橋村"
+    },
+    {
+      "date": "2026-10-29",
+      "role": "Guest",
+      "member_name": "平田"
+    },
+    {
+      "date": "2026-10-29",
+      "role": "Women",
+      "member_name": "中畑"
+    }
+  ],
   "round_status": {
-    "Men": {},
-    "Guest": {},
-    "Women": {}
+    "Men": {
+      "橋村": true
+    },
+    "Guest": {
+      "平田": true
+    },
+    "Women": {
+      "中畑": true
+    }
   }
 }
