@@ -104,6 +104,21 @@
       "date": "2026-11-08",
       "role": "Women",
       "member_name": "福原"
+    },
+    {
+      "date": "2026-11-09",
+      "role": "Men",
+      "member_name": "高瀬"
+    },
+    {
+      "date": "2026-11-09",
+      "role": "Guest",
+      "member_name": "秋山"
+    },
+    {
+      "date": "2026-11-09",
+      "role": "Women",
+      "member_name": "重田"
     }
   ],
   "round_status": {
@@ -115,7 +130,8 @@
       "山下": true,
       "秋山": true,
       "一宮": true,
-      "平田": true
+      "平田": true,
+      "高瀬": true
     },
     "Guest": {
       "平田": true,
@@ -125,15 +141,17 @@
       "馬塲": true,
       "一宮": true,
       "高瀬": true,
-      "宮崎": true
+      "宮崎": true,
+      "秋山": true
     },
     "Women": {
-      "中畑": true,
-      "津田": true,
-      "辻本": true,
-      "林": true,
-      "岸田": true,
-      "福原": true
+      "岸田": false,
+      "重田": false,
+      "津田": false,
+      "中畑": false,
+      "福原": false,
+      "辻本": false,
+      "林": false
     }
   }
 }
