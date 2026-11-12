@@ -149,6 +149,21 @@
       "date": "2026-11-11",
       "role": "Women",
       "member_name": "辻本"
+    },
+    {
+      "date": "2026-11-12",
+      "role": "Men",
+      "member_name": "岡本"
+    },
+    {
+      "date": "2026-11-12",
+      "role": "Guest",
+      "member_name": "矢野(宏)"
+    },
+    {
+      "date": "2026-11-12",
+      "role": "Women",
+      "member_name": "津田"
     }
   ],
   "round_status": {
@@ -163,7 +178,8 @@
       "平田": true,
       "高瀬": true,
       "矢野(宏)": true,
-      "山本": true
+      "山本": true,
+      "岡本": true
     },
     "Guest": {
       "平田": true,
@@ -176,12 +192,13 @@
       "宮崎": true,
       "秋山": true,
       "辻井": true,
-      "藤井": true
+      "藤井": true,
+      "矢野(宏)": true
     },
     "Women": {
       "岸田": false,
       "重田": false,
-      "津田": false,
+      "津田": true,
       "中畑": false,
       "福原": false,
       "辻本": true,
